@@ -274,6 +274,7 @@
     \begin{equation*}
            \hat{\mathbb{V}}(\hat{\beta})_{homoskedastic} = \frac{\hat{\sigma}^{2}}{n_{0}} + \frac{\hat{\sigma}^{2}}{n_{1}}, \qquad \hat{\mathbb{V}}(\hat{\beta})_{EHW} = \frac{\hat{\sigma}^{2}(0)}{n_{0}} + \frac{\hat{\sigma}^{2}(1)}{n_{1}}
          \end{equation*}
+       \item Key question for later: how do we estimate $\hat{\sigma}^{2}(x)$?
   \end{wideitemize}
   \end{column}%
   \hfill%
@@ -324,7 +325,7 @@
       \end{itemize}
     \item The Behrens-Fisher problem -- imagine that $n_{0} >> n_{1}$. (E.g. many untreated, a few treated).
       \begin{itemize}
-      \item Then, the distribution is really dirven by $\sigma^{2}(1)/n_{1}$, and $n_{1}$ is the correct degrees of freedom.
+      \item Then, the distribution is really driven by $\sigma^{2}(1)/n_{1}$, and $n_{1}$ is the correct degrees of freedom.
       \item This makes a big difference! Contrast $t^{3}_{0.975} = 3.182$  vs. $t^{28}_{0.975}=2.048$
       \end{itemize}
   \end{wideitemize}
@@ -343,7 +344,7 @@
   \item Relative variance varies from 0.5 to 2
   \end{itemize}
   \begin{center}
-  \includegraphics[width=0.7\linewidth]{imbenskolesar_coverage.pdf}
+  \includegraphics[width=0.7\linewidth]{images/imbenskolesar_coverage.pdf}
   \end{center}
 \end{frame}
 
@@ -369,12 +370,20 @@
 
 \begin{frame}{Doing this in practice}
   \begin{wideitemize}
-  \item These are solveable and packages exist. Stata uses the HC2
+  \item These are solveable and packages exist. Stata uses the EHW 
     standard errors by default. For the Bell-Maccaffrey adjustments,
     see \texttt{reg\_sandwich}. For R, see \texttt{estimatR},
     \texttt{clubSandwich}, and Kolesar's github repo:
     \texttt{https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors}
   \item Key point is that these are all approximations in finite sample
+  \item What are the options for estimating $\hat{\sigma}^{2}(x)$?  
+    \begin{align*}
+      u_{j} &= Y_{j} - W_{j}\beta, h = \mathbf{W}(\mathbf{W}'\mathbf{W})^{-1}\mathbf{W}' & \\
+          \hat{\mathbb{V}}(\hat{\beta})_{robust} &= (\mathbf{W}'\mathbf{W})^{-1}\sum_{j}(n/n-k) u_{j}^{2}W_{i}'W_{i}(\mathbf{W}'\mathbf{W})^{-1} \qquad \qquad&  \text{(robust)}\\
+       \hat{\mathbb{V}}(\hat{\beta})_{HC2} &= (\mathbf{W}'\mathbf{W})^{-1}\sum_{j} (1/(1-h_{jj}))u_{j}^{2}W_{i}'W_{i}(\mathbf{W}'\mathbf{W})^{-1} \qquad \qquad& \text{(HC2)}\\
+       \hat{\mathbb{V}}(\hat{\beta})_{HC3} &= (\mathbf{W}'\mathbf{W})^{-1}\sum_{j} (1/(1-h_{jj})^{2})u_{j}^{2}W_{i}'W_{i}(\mathbf{W}'\mathbf{W})^{-1} \qquad \qquad& \text{(HC3)}\\
+    \end{align*}
+    
   \end{wideitemize}
 \end{frame}
 
@@ -383,7 +392,7 @@
   \item How should we be thinking about inference anyway? What's the error in $\epsilon$ mean anyway?
   \item The thought experiment typically comes from a sampling
     perspective -- we consider that this is a small sample from a
-    broader population, and uncertainty comes from whether the estimates reflect the true underlyign population
+    broader population, and uncertainty comes from whether the estimates reflect the true underlying population
     \begin{itemize}
     \item Note that this contrasts with our design-based thought experiment!
     \end{itemize}
@@ -420,12 +429,12 @@
   \item   Three estimands (apologies in advance, my $n,N$ are reversed from the paper):
   \begin{enumerate}
   \item $\theta^{descr} = N^{-1}_{1}\sum_{i=1}^{N}D_{i}Y_{i} - N^{-1}_{0}\sum_{i=1}^{N}(1-D_{i})Y_{i}$
-  \item $\theta^{causal, sample} = n^{-1}\sum_{i=1}^{n}R_{i}(Y^{*}_{i}(1) - Y_{i}^{*}(0))$
+  \item $\theta^{causal, sample} = n^{-1}\sum_{i=1}^{N}R_{i}(Y^{*}_{i}(1) - Y_{i}^{*}(0))$
   \item $\theta^{causal} = N^{-1}\sum_{i=1}^{N}(Y^{*}_{i}(1) - Y_{i}^{*}(0))$    
   \end{enumerate}
 \item We have a single estimator we can consider:
   \begin{equation*}
-    \hat{\theta} = n^{-1}_{1}\sum_{i=1}^{n}R_{i}D_{i}Y_{i} - n^{-1}_{0}\sum_{i=1}^{n}R_{i}(1-D_{i})Y_{i}
+    \hat{\theta} = n^{-1}_{1}\sum_{i=1}^{N}R_{i}D_{i}Y_{i} - n^{-1}_{0}\sum_{i=1}^{N}R_{i}(1-D_{i})Y_{i}
   \end{equation*}
 \item Key point of paper -- the variance of this estimator depends on:
   \begin{enumerate}
@@ -563,7 +572,7 @@
 \end{frame}
 
 \begin{frame}{Abadie et al}
-  \includegraphics[width=\linewidth]{abadiecluster.png}
+  \includegraphics[width=\linewidth]{images/abadiecluster.png}
 \end{frame}
 
 
@@ -664,7 +673,7 @@
     colonial boundaries
     \begin{itemize}
     \item Claim in Kelly (2019) is that t-statistics in these types of regressions are grossly amplified by spatial correlation
-    \item Fixable with Conley standard errors
+    \item Fixable with Conley standard errors?
     \item This is a huge deal for a lot of literatures (economic
       history especially) -- matters for corporate governance
       literature too (LLSV)
@@ -737,7 +746,7 @@
   \end{column}
   \hfill%
   \begin{column}{.5\textwidth}
-    \includegraphics[width=\linewidth]{gan_fiddle.png}
+    \includegraphics[width=\linewidth]{images/gan_fiddle.png}
   \end{column}
   \end{columns}
 \end{frame}
